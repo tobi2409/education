@@ -644,6 +644,76 @@ Formuliere einen sprachunabhängigen Algorithmus zum Finden des größten Listen
 \end{uebung}
 
 
+\section{Das Halteproblem -- eine Grenze des Berechenbaren}
+
+Das \textbf{Halteproblem} stellt folgende Frage: Kann es ein einziges Programm geben, das für \emph{jedes} beliebige Programm $M$ und \emph{jede} Eingabe $w$ korrekt entscheidet, ob $M$ mit der Eingabe $w$ irgendwann anhält oder für immer weiterläuft?
+
+Wir nennen ein solches hypothetisches Entscheidungsprogramm $H$. Es soll immer terminieren und genau eine der beiden Antworten liefern:
+
+\begin{itemize}
+  \item $H(M,w)=\texttt{hält}$, falls $M$ mit der Eingabe $w$ nach endlich vielen Schritten anhält.
+  \item $H(M,w)=\texttt{läuft weiter}$, falls $M$ mit der Eingabe $w$ niemals anhält.
+\end{itemize}
+
+Für viele einzelne Programme kann man diese Frage durchaus beantworten. Das Halteproblem fragt jedoch nach einem \textbf{allgemeinen Verfahren}, das ausnahmslos für alle Programme und Eingaben funktioniert. Ein solches Verfahren existiert nicht: Das Halteproblem ist \textbf{unentscheidbar}.
+
+\subsection{Widerspruchsbeweis}
+
+Wir beweisen die Unentscheidbarkeit, indem wir zunächst das Gegenteil annehmen und daraus einen Widerspruch herleiten.
+
+\begin{enumerate}
+  \item \textbf{Annahme:} Es gibt ein korrektes Programm $H$, das das Halteproblem für jedes Paar $(M,w)$ entscheidet und dabei selbst immer anhält.
+  \item Wir konstruieren ein neues Programm $D$. Es erhält ein Programm $M$ als Eingabe und fragt $H$, ob $M$ mit seinem eigenen Programmtext als Eingabe anhält, also nach $H(M,M)$.
+  \item $D$ betrachtet die Vorhersage von $H$ und verhält sich absichtlich genau entgegengesetzt:
+\end{enumerate}
+
+\begin{verbatim}
+  Programm D(M):
+    falls H(M, M) = "hält":
+      laufe für immer weiter
+    sonst:
+      halte sofort an
+\end{verbatim}
+
+\begin{merksatz}[Beweisidee statt logischer Folgerung]
+Dass $D$ die Vorhersage von $H$ absichtlich umkehrt, ist die entscheidende \textbf{Beweisidee} und eine bewusste Entscheidung bei der Konstruktion von $D$. Dieses Verhalten folgt nicht logisch allein daraus, dass $D$ ein Programm $M$ entgegennimmt und $H(M,M)$ abfragt. Man hätte $D$ auch anders programmieren können; gerade die Umkehrung wird gewählt, weil sie die angenommene allgemeine Korrektheit von $H$ prüfbar macht. Bei der Erklärung eines Beweises müssen solche konstruktiven Entscheidungen ausdrücklich begründet werden, damit der Gedankengang nachvollziehbar bleibt.
+\end{merksatz}
+
+Nun geben wir $D$ seinen eigenen Programmtext als Eingabe und betrachten $D(D)$:
+
+\begin{itemize}
+  \item Sagt $H(D,D)=\texttt{hält}$ voraus, dann läuft $D(D)$ aufgrund seiner Definition für immer weiter. Die Vorhersage von $H$ ist also falsch.
+  \item Sagt $H(D,D)=\texttt{läuft weiter}$ voraus, dann hält $D(D)$ aufgrund seiner Definition sofort an. Auch diese Vorhersage von $H$ ist falsch.
+\end{itemize}
+
+In beiden möglichen Fällen widerspricht das tatsächliche Verhalten von $D(D)$ der Vorhersage von $H$. Damit kann das angenommene, immer korrekte Entscheidungsprogramm $H$ nicht existieren. Also ist das Halteproblem unentscheidbar.
+
+\subsection{Warum widerlegt ein Programm $A'$ nicht die Korrektheit von $A$?}
+
+Betrachten wir ein Addierprogramm $A$, das zwei Zahlen $m$ und $n$ korrekt addiert:
+
+\begin{verbatim}
+  A(m, n)  = m + n
+  A'(m, n) = A(m, n) + 1
+\end{verbatim}
+
+$A'$ verwendet das Ergebnis von $A$ und gibt absichtlich einen um eins größeren Wert zurück. Daraus folgt jedoch nicht, dass $A$ falsch rechnet. $A$ erfüllt weiterhin genau seine eigene Spezifikation, nämlich $m+n$ zu berechnen. $A'$ hat eine andere Spezifikation und berechnet $m+n+1$. Ein nachgeschaltetes Programm kann das Ergebnis eines korrekten Programms verändern, ohne dessen Korrektheit zu widerlegen.
+
+Der Aufbau erinnert oberflächlich an $D$: Ein Programm verwendet das Ergebnis eines anderen Programms und verändert es. Der entscheidende Unterschied ist jedoch die \textbf{Selbstbezüglichkeit zusammen mit der angenommenen Allgemeingültigkeit von $H$}:
+
+\begin{itemize}
+  \item $H$ soll eine Aussage über das Halteverhalten \textbf{aller Programme} machen. Da $D$ selbst ein Programm ist, gehört auch $D$ zu diesem Geltungsbereich.
+  \item $D$ macht sein eigenes Halteverhalten bei der Eingabe $D$ unmittelbar davon abhängig, was $H$ genau über dieses Verhalten von $D(D)$ vorhersagt.
+  \item $A'$ verändert dagegen nur einen Zahlenwert. Die Ausgabe von $A$ behauptet nichts über das Verhalten von $A'$ und muss daher nicht durch die spätere Addition von $1$ falsch werden.
+\end{itemize}
+
+Der Widerspruch entsteht somit nicht schon dadurch, dass ein Programm das Ergebnis eines anderen Programms umkehrt oder verändert. Er entsteht, weil $H$ beansprucht, auch $D(D)$ korrekt vorherzusagen, während $D(D)$ gerade so definiert wurde, dass sein Verhalten dieser konkreten Vorhersage widerspricht.
+
+\begin{merksatz}
+Die Unentscheidbarkeit bedeutet nicht, dass man für kein einzelnes Programm feststellen kann, ob es anhält. Sie bedeutet, dass es keinen Algorithmus gibt, der diese Frage für \textbf{jedes} Programm und \textbf{jede} Eingabe immer korrekt entscheidet.
+\end{merksatz}
+
+
 \section{Rechnen mit integers – ein erster Algorithmus}
         
   In diesem Kapitel geht es nicht um einen Beweis, sondern um einen \textbf{Algorithmus}.\\
